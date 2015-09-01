@@ -4,9 +4,13 @@ __license__ = 'MIT'
 
 from django.conf import settings
 from django.conf.urls import include, url
+from django.core.exceptions import ImproperlyConfigured
 
 
-FORCE_NAMESPACE = getattr(settings, 'URLDECORATOR_FORCE_NAMESPACE', False)
+try:
+    FORCE_NAMESPACE = getattr(settings, 'URLDECORATOR_FORCE_NAMESPACE', False)
+except ImproperlyConfigured:
+    FORCE_NAMESPACE = False
 
 
 class NamespaceError(Exception):
