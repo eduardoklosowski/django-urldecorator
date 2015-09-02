@@ -9,8 +9,10 @@ from django.core.exceptions import ImproperlyConfigured
 
 try:
     FORCE_NAMESPACE = getattr(settings, 'URLDECORATOR_FORCE_NAMESPACE', False)
+    SAVE_URLNAME = getattr(settings, 'URLDECORATOR_SAVE_URLNAME_IN_VIEW', False)
 except ImproperlyConfigured:
     FORCE_NAMESPACE = False
+    SAVE_URLNAME = False
 
 
 class NamespaceError(Exception):
@@ -55,5 +57,11 @@ class URLList(object):
             else:
                 view_function = view
             self.add_url(regex, view_function, kwargs, name=name, prefix=prefix)
+            if SAVE_URLNAME and name:
+                if self.namespace:
+                    namespace = self.namespace + ':'
+                else:
+                    namespace = ''
+                view.urlname = namespace + name
             return view
         return func
