@@ -24,6 +24,22 @@ class URLList(object):
         self.namespace = namespace
         self.urls = []
 
+    def __repr__(self):
+        return repr(self.get_urls())
+
+    def __len__(self):
+        if self.namespace:
+            return 1
+        return len(self.urls)
+
+    def __getitem__(self, key):
+        if self.namespace:
+            return self.get_urls()[0]
+        return self.urls[key]
+
+    def __iter__(self):
+        return iter(self.get_urls())
+
     def get_urls(self):
         if self.namespace:
             return [url(r'', include(self.urls, namespace=self.namespace))]
