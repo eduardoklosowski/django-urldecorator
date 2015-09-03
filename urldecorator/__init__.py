@@ -20,27 +20,39 @@ class NamespaceError(Exception):
 
 
 class URLList(object):
-    def __init__(self, namespace=None):
+    def __init__(self, namespace=None, lazy=None):
         if FORCE_NAMESPACE and namespace is None:
             raise NamespaceError('Namespace not defined')
         self.namespace = namespace
         self.urls = []
+        self.ready = False
+        self.lazy = lazy
 
     def __repr__(self):
         return repr(self.get_urls())
 
     def __len__(self):
+        self._avaliate()
         if self.namespace:
             return 1
         return len(self.urls)
 
     def __getitem__(self, key):
+        self._avaliate()
         if self.namespace:
             return self.get_urls()[0]
         return self.urls[key]
 
     def __iter__(self):
+        self._avaliate()
         return iter(self.get_urls())
+
+    def _avaliate(self):
+        if self.ready:
+            return
+        if self.lazy:
+            self.lazy()
+        self.ready = True
 
     def get_urls(self):
         if self.namespace:
