@@ -5,28 +5,21 @@ __license__ = 'MIT'
 from django.conf import settings
 from django.conf.urls import include, url
 from django.core.exceptions import ImproperlyConfigured
+from importlib import import_module
 
 
 try:
-    FORCE_NAMESPACE = getattr(settings, 'URLDECORATOR_FORCE_NAMESPACE', False)
     SAVE_URLNAME = getattr(settings, 'URLDECORATOR_SAVE_URLNAME_IN_VIEW', False)
 except ImproperlyConfigured:
-    FORCE_NAMESPACE = False
     SAVE_URLNAME = False
 
 
-class NamespaceError(Exception):
-    pass
-
-
 class URLList(object):
-    def __init__(self, namespace=None, lazy=None):
-        if FORCE_NAMESPACE and namespace is None:
-            raise NamespaceError('Namespace not defined')
+    def __init__(self, namespace=None, lazy_import=None):
         self.namespace = namespace
         self.urls = []
         self.ready = False
-        self.lazy = lazy
+        self.lazy_import = lazy_import
 
     def __repr__(self):
         return repr(self.get_urls())
@@ -40,7 +33,7 @@ class URLList(object):
     def __getitem__(self, key):
         self._avaliate()
         if self.namespace:
-            return self.get_urls()[0]
+            return self.get_urls()[key]
         return self.urls[key]
 
     def __iter__(self):
@@ -50,8 +43,8 @@ class URLList(object):
     def _avaliate(self):
         if self.ready:
             return
-        if self.lazy:
-            self.lazy()
+        if self.lazy_import:
+            import_module(self.lazy_import)
         self.ready = True
 
     def get_urls(self):
